@@ -1,0 +1,258 @@
+Part 1: Understanding Task Creation and Status UpdatesMy 
+
+
+Initial Understanding
+Given the names of the files and the project structure, I believed there would be some kind of class to create and modify tasks, and to save the data. I thought that the application would be asked for a command by the user, it would process it, create or update a task and store it.
+
+Files Involved
+
+The key files used with the creation and updating of tasks are:
+
+TaskManagerCli.java – Handles commands entered by the user, such as create and status.
+TaskManager.java – The main logic for creating Tasks and updating the status of Tasks.
+Task.java – It is a java class that represents a task and has properties such as title, description, priority, status, due date, tags etc.
+TaskStorage.java – Represents a collection of tasks to be stored, retrieved, modified and saved in the file tasks.json.
+
+
+How Task Creation Works:
+
+When a user creates a task, the flow is:
+
+User enters create command
+          ↓
+TaskManagerCli receives the command
+          ↓
+TaskManager creates a new Task object
+          ↓
+TaskStorage stores the task
+          ↓
+Task is saved into tasks.json
+
+TaskManagerCli class is used to receive the information typed by the user and to pass it to TaskManager. The TaskManager creates a new Task object. New tasks have a default status of TODO and automatically get a unique ID, a creation date. Then it is passed to TaskStorage, which then stores it in the tasks.json file.
+
+
+
+How Task Status Update Works:
+
+When a user changes the status of a task, the flow is:
+
+User enters status command
+          ↓
+TaskManagerCli receives the command
+          ↓
+TaskManager finds the task
+          ↓
+Task status is updated
+          ↓
+Changes are saved to tasks.json
+
+TaskStorage returns the required task to the TaskManager which updates the TaskManager's status. The model marks the application as DONE at runtime, by calling markAsDone() if the new status is "DONE". If you update after that, the changes will be saved, and will be available the next time you run the application.
+
+
+The different ways that data can be stored and retrieved:
+
+The application saves task information to a file, tasks.json.
+
+The TaskStorage class is responsible for handling this data. Loads existing tasks at launch and saves changes when tasks are created, updated, or deleted.
+
+Tasks are temporarily stored in memory in a HashMap with a taskId as the key for fast retrieval of a specific task.
+
+
+
+Interesting things I discovered:
+
+And as I was poking around I noticed that each class has a different responsibility:
+
+TaskManagerCli is used to process user input.
+The main task logic is implemented in TaskManager.
+Task is the task data, and some of the task actions.
+TaskStorage is used to save and load data.
+
+This will make the code easier to understand since each class will be responsible for a single task.
+
+
+
+
+After examining the code, I have the following understanding:
+
+This exploration taught me that there was a flow from the user input to the storing of the data in the application. Data is stored in TaskStorage, processed by TaskManager and begins in the CLI.
+
+I learned how data flows through various classes and what each file is doing in this activity.
+
+
+
+
+Part 2: Deepening My Understanding of the Codebase
+
+My Current Understanding:
+I have explored the Task Manager application and know that it is a command-line application used for creating and managing tasks.
+The application is divided into different parts:
+
+TaskManagerCli.java processes the commands typed by the user.
+TaskManager.java is the main class for managing tasks.
+Task.java represents the information and behaviour of a task.
+TaskStorage.java is used to save and load tasks from the tasks.json file.
+
+I see from what I've witnessed, the program begins in TaskManagerCli and the command is read from there. This command is then executed by TaskManager and it will execute the required task. Finally, when task information must be stored or retrieved, then TaskStorage is used.
+
+
+
+
+Questions That Helped Me Understand the Code Better:
+
+
+Question 1: How can the application determine the command that the user wants to run?
+I went through the code and discovered that TaskManagerCli has a switch statement in the executeCommand() method. This validates commands like create, list, status, and delete, and passes it off to the appropriate method.
+
+
+Question 2: How does a task keep track of its information?
+
+The Task class contains information including:
+
+Task ID
+Title
+Description
+Priority
+Status
+Due date
+Tags
+The dates when the items were created and when they were completed.
+
+Every new task automatically gets a new ID and a default status of TODO.
+
+Question 3:When the app is closed what occurs?
+I was initially thinking that the tasks would be lost once the program was halted. I checked TaskStorage and found out that the tasks are being stored in a tasks.json file with the help of the Gson library.
+After the application is restarted, the load() method reads the file and loads the previous tasks again into the application.
+
+Question 4: What happens to the tasks when they are changed?
+The application first looks up for the required task by ID. The task is then updated in some way, like changing the status, priority, due date or tags. Once changed, TaskStorage.save() is called to ensure that the changed information is saved permanently.
+
+Question 5:Why are the classes of code separated into different classes?
+I saw that every class is responsible for something. This will make the code easier to understand as it will separate the user interface, task logic, task data and file storage.
+
+
+What I learned from this exploration
+
+-This helped me to grasp how classes are working together to achieve the same action. I looked primarily at individual files, before going into the code. Now that I have followed the flow of the program, I can see how information is passed from the user command, to the business logic and then to the storage.
+
+-I also learned that if I want to read a large code base, it's easier if I break it up into parts and understand the purpose of each part of the code, rather than trying to understand everything in one go.
+
+
+
+
+
+Part 3: Mapping Data Flow and State Management
+
+My Current Understanding
+I can guess that in the Task Manager application, data is initiated with a command the user enters. Information is passed to the CLI, to the TaskManager, and then stored or retrieved via TaskStorage.
+
+The main files involved in this data flow are:
+
+TaskManagerCli.java – accepts user input and command.
+TaskManager.java – Handles the input of the commands and manages the operations of the tasks.
+Task.java – contains the information and functionality of a task.
+TaskStorage.java – handles loading/saving tasks from tasks.json file.
+
+
+Data Flow Example: Creating a Task
+
+The flow of creating a task is:
+
+User enters create command
+          ↓
+TaskManagerCli reads the command and information
+          ↓
+TaskManager creates a new Task object
+          ↓
+TaskStorage adds the task to memory
+          ↓
+TaskStorage saves the task into tasks.json
+
+
+
+
+How changes in the state are handled.
+
+Within the application, the tasks are stored in a HashMap within TaskStorage. The task ID provides a quick and easy way to locate a specific task.
+
+If a task is modified – e.g. status or priority is changed – the following occurs:
+The task is picked up from TaskStorage.
+Changes are made to the Task object that is required.
+The changes are saved back into tasks.json.
+
+This implies that the most up-to-date version of the task is saved even after the program is closed.
+
+
+
+Data Transformations
+-The main transformations occurring to the data are:
+-Command line user input is translated into task information.
+-Text-based dates will be converted to LocalDateTime objects.
+-When saving, Java task objects are converted to JSON format.
+-When loading the application, you'll get Java objects back from JSON data.
+
+
+These are some possible areas for failure.
+As I was looking around the code, I saw that there were some potential problems that could arise:
+
+-The user can provide incorrect date format.
+-The user can submit a task ID that isn't found.
+-May have issues reading or writing to the tasks.json file.
+-An invalid priority or status value can be entered by a user.
+
+The application tries to catch some of these cases, and displays an error message and prevents the wrong changes.
+
+
+
+
+How to Debug Data Flow Troubleshooting
+If a task wasn't being created or updated properly, I would follow the flow of the data by checking the following:
+
+-If TaskManagerCli has been given the proper user input.
+-If the request was handled properly by TaskManager.
+-Whether TaskStorage successfully saved and loaded the task.
+-Whether or not the data was properly added to tasks.json.
+
+
+
+What I learned:
+-This section enabled me to realize that the application is straightforward and has a clear flow of input and storage of data. I learnt that I was not to look at each file individually, but to follow the flow of information from one class to the other.
+-I also found that knowing the source, modification and storage location of the data is useful for identifying issues and figuring out what new features might be added later.
+
+
+Part 4: Final Reflection
+
+
+The way I see the codebase.How I understand the codebase:
+
+At first glance at the Task Manager project, I didn't attempt to figure out all the files. The first step was to examine the structure of the project and determine the key classes. This helped me to understand what each section of the application was doing before getting down to the detail.
+I traced the application usage flow from user inputting the command, to user command being processed, and data for user command being stored in tasks.json.
+
+Challenges I Encountered:
+
+One of the challenges was to grasp the interaction of the various classes. I started to view each file individually and couldn't see the wood for the trees.
+I followed the flow of information, like creation of the task, updating the task status, etc. to see how information moves between TaskManagerCli, TaskManager, Task, and TaskStorage.
+
+Most Helpful AI Prompt:
+
+The prompt that helped me was the prompt for understanding a particular feature. It was a great tool to dissect the code into smaller pieces and follow the execution flow, one step at a time.
+I have not analyzed the entire application, but instead studied one of its features and traced through its operation.
+
+
+What I Would Do Differently Next Time: What I would do differently next time:
+
+If I were to work with a new codebase next time I would first read the README file, find the entry point of the application and then follow a small feature from the user input to the data storage.
+I would also take notes while scanning the code as I am reading it as it also helps me to remember how each part relates to the others.
+
+
+The following tools and resources may be used in conjunction with the other materials:
+
+Other helpful tools/ resources I believe would be:
+-Reading the project documentation and comments.
+-Navigation from one class to another and from one method to another in an IDE.
+-The execution of Software and the testing of various commands.
+-Examining log or error messages to gain insight into issues.
+
+Final Thoughts
+I learned that it takes time to understand an existing code base and that it should be done in stages on this exercise. I was taught to be mindful of how the various components of the application function before trying to change anything.
+With AI as my guide, I was able to ask better questions and check my understanding, and I learned the power of examining the actual code to ensure that my understanding is correct.
